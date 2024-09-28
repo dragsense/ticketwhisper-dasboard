@@ -88,7 +88,7 @@ app.post("/api/admin/logout", (req, res) => {
 
 // Apply authMiddleware to protect specific routes
 app.use("/api/websites", authMiddleware, websiteRoutes);
-app.use("/api/urls", scrapeRoutes);
+app.use("/api/urls", authMiddleware, scrapeRoutes);
 app.use("/api/users", authMiddleware, userRoutes);
 
 const PORT = process.env.PORT || 5000;

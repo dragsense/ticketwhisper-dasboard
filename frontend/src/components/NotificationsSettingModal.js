@@ -8,6 +8,7 @@ import {
   notification,
   Spin,
   Button,
+  Skeleton,
 } from "antd";
 import {
   getNotificationsSetting,
@@ -20,7 +21,7 @@ const NotificationsSettingModal = ({ visible, onClose, _websites }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false); // Overall loading state
   const [fetchingSettings, setFetchingSettings] = useState(false); // For fetching data
-  const [selectedPlan, setSelectedPlan] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState("1");
 
   const fetchNotificationSettings = async (plan) => {
     try {
@@ -34,7 +35,10 @@ const NotificationsSettingModal = ({ visible, onClose, _websites }) => {
         rows: rows || 5,
         sendLinks: sendLinks || false,
         websites: websites || [],
+        preferredPlan: plan,
       });
+
+      
     } catch (error) {
       console.error("Error fetching notification settings:", error);
       notification.error({
@@ -54,9 +58,12 @@ const NotificationsSettingModal = ({ visible, onClose, _websites }) => {
 
   const handleUpdate = async () => {
     try {
+
       const values = await form.validateFields();
       setLoading(true); // Set loading state during the update process
 
+
+     
       await updateNotificationsSetting(selectedPlan, values);
 
       notification.success({
@@ -110,36 +117,33 @@ const NotificationsSettingModal = ({ visible, onClose, _websites }) => {
             </Select>
           </Form.Item>
 
-          {/* Only show the other fields if a plan is selected */}
-          {selectedPlan && !fetchingSettings && (
-            <>
-              <Form.Item label="Frequency" name="frequency">
-                <Select placeholder="Select frequency">
-                  <Option value="daily">Daily</Option>
-                  <Option value="weekly">Weekly</Option>
-                  <Option value="monthly">Monthly</Option>
-                </Select>
-              </Form.Item>
+           
+                <Form.Item label="Frequency" name="frequency">
+                  <Select placeholder="Select frequency">
+                    <Option value="daily">Daily</Option>
+                    <Option value="weekly">Weekly</Option>
+                    <Option value="monthly">Monthly</Option>
+                  </Select>
+                </Form.Item>
 
-              <Form.Item label="Number of Rows" name="rows">
-                <Input placeholder="Enter number of rows" />
-              </Form.Item>
+                <Form.Item label="Number of Rows" name="rows">
+                  <Input placeholder="Enter number of rows" />
+                </Form.Item>
 
-              <Form.Item name="sendLinks" valuePropName="checked">
-                <Checkbox>Send Links</Checkbox>
-              </Form.Item>
+                <Form.Item name="sendLinks" valuePropName="checked">
+                  <Checkbox>Send Links</Checkbox>
+                </Form.Item>
 
-              <Form.Item label="Associated Websites" name="websites">
-                <Select mode="multiple" placeholder="Select websites">
-                  {_websites.map((website) => (
-                    <Option key={website._id} value={website._id}>
-                      {website.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </>
-          )}
+                <Form.Item label="Associated Websites" name="websites">
+                  <Select mode="multiple" placeholder="Select websites">
+                    {_websites.map((website) => (
+                      <Option key={website._id} value={website._id}>
+                        {website.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              
         </Form>
       </Spin>
     </Modal>

@@ -165,8 +165,11 @@ const ScrappData = () => {
     }
   };
 
+
   const fetchScrapedData = async (urlId, page, pageSize) => {
     setLoadingScrapedData(true);
+
+  
     try {
       const response = await getScrappedData(urlId, page, pageSize);
       const { data, total } = response;
@@ -350,6 +353,7 @@ const ScrappData = () => {
                 {/* Left Column: URLs List */}
                 <Col span={8}>
                   <Card
+                  loading={loadingUrls}
                     title="URL List"
                     extra={
                       <Button
@@ -450,6 +454,7 @@ const ScrappData = () => {
                 {/* Right Column: Scraped Data */}
                 <Col span={16}>
                   <Card
+                
                     title={`Scraped Data ${
                       selectedUrl ? `: ${selectedUrl.name}` : ""
                     }`} 
@@ -485,11 +490,11 @@ const ScrappData = () => {
                       )
                     }
                   >
-                    {loadingScrapedData ? (
-                      <Spin />
-                    ) : (
-                      selectedUrl && (
-                        <>
+                    
+                      <Spin spinning={loadingScrapedData}>
+                   
+                      {selectedUrl && (
+                    
                           <Table
                             dataSource={transformedData}
                             columns={columns}
@@ -501,9 +506,9 @@ const ScrappData = () => {
                             onChange={handleScrapedDataTableChange}
                             scroll={{ y: 500 }}
                           />
-                        </>
-                      )
-                    )}
+                       
+                      )}
+                    </Spin>
                   </Card>
                 </Col>
               </Row>

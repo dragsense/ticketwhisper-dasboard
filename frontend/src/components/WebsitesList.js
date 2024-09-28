@@ -9,6 +9,7 @@ import {
   notification,
   Popconfirm,
   Select,
+  Spin,
 } from "antd";
 import {
   DeleteOutlined,
@@ -82,8 +83,6 @@ const WebsitesList = () => {
     fetchWebsites(pagination.current, pagination.pageSize, filter);
   };
 
-
-
   const handleAddWebsite = async () => {
     if (name && url) {
       const newWebsite = { name, url, wrapperSelector, scrapFields };
@@ -98,7 +97,6 @@ const WebsitesList = () => {
           description: "The website has been added successfully.",
         });
       } catch (error) {
-        
         notification.error({
           message: "Error adding website",
           description: error.response?.data?.error || error.message,
@@ -110,7 +108,7 @@ const WebsitesList = () => {
       alert("Website Name and Url are required!");
     }
   };
-  
+
   const handleDeleteWebsite = async (index) => {
     const websiteToDelete = websites[index];
     setLoading(true); // Start loading
@@ -130,7 +128,7 @@ const WebsitesList = () => {
       setLoading(false); // Stop loading
     }
   };
-  
+
   const handleUpdateWebsite = async () => {
     const updatedWebsite = {
       ...selectedWebsite,
@@ -158,7 +156,7 @@ const WebsitesList = () => {
       setLoading(false); // Stop loading
     }
   };
-  
+
   const clearForm = () => {
     setName("");
     setWrapperSelector("");
@@ -193,7 +191,6 @@ const WebsitesList = () => {
 
   return (
     <div className="container mx-auto min-h-[86vh] p-6">
-
       <Card
         title="Websites List"
         extra={
@@ -228,62 +225,63 @@ const WebsitesList = () => {
               />
             </Form.Item>
           </div>
-
-         
         </div>
-
-        <Table
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-           
-          }}
-          onChange={handleTableChange}
-          className="mt-4"
-          dataSource={websites}
-          rowKey={(record) => record._id}
-          loading={loading} // Set loading state for the table
-        >
-          <Table.Column title="Name" dataIndex="name" />
-          <Table.Column title="Url" dataIndex="url" />
-          <Table.Column title="Wrapper Selector" dataIndex="wrapperSelector" />
-          <Table.Column
-            title="Fields"
-            render={(text, website) => (
-              <>
-                {website.scrapFields.map((field, idx) => (
-                  <div key={idx}>
-                    {field.fieldTitle} ({field.selector})
-                  </div>
-                ))}
-              </>
-            )}
-          />
-          <Table.Column
-            title="Actions"
-            render={(text, website, index) => (
-              <>
-                <Button
-                  icon={<EditOutlined />}
-                  onClick={() => handleOpenModal(website)}
-                />
-                <Popconfirm
-                  title="Are you sure you want to delete this website?"
-                  onConfirm={() => handleDeleteWebsite(index)}
-                  okText="Yes"
-                  cancelText="No"
-                >
+        <Spin spinning={loading}>
+          <Table
+            pagination={{
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              total: pagination.total,
+            }}
+            onChange={handleTableChange}
+            className="mt-4"
+            dataSource={websites}
+            rowKey={(record) => record._id}
+            loading={loading} // Set loading state for the table
+          >
+            <Table.Column title="Name" dataIndex="name" />
+            <Table.Column title="Url" dataIndex="url" />
+            <Table.Column
+              title="Wrapper Selector"
+              dataIndex="wrapperSelector"
+            />
+            <Table.Column
+              title="Fields"
+              render={(text, website) => (
+                <>
+                  {website.scrapFields.map((field, idx) => (
+                    <div key={idx}>
+                      {field.fieldTitle} ({field.selector})
+                    </div>
+                  ))}
+                </>
+              )}
+            />
+            <Table.Column
+              title="Actions"
+              render={(text, website, index) => (
+                <>
                   <Button
-                    type="danger"
-                    icon={<DeleteOutlined />}
-                    className="ml-2"
+                    icon={<EditOutlined />}
+                    onClick={() => handleOpenModal(website)}
                   />
-                </Popconfirm>
-              </>
-            )}
-          />
-        </Table>
+                  <Popconfirm
+                    title="Are you sure you want to delete this website?"
+                    onConfirm={() => handleDeleteWebsite(index)}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button
+                      type="danger"
+                      icon={<DeleteOutlined />}
+                      className="ml-2"
+                    />
+                  </Popconfirm>
+                </>
+              )}
+            />
+          </Table>
+        </Spin>
       </Card>
 
       {/* Add/Edit Website Modal */}
@@ -304,7 +302,7 @@ const WebsitesList = () => {
               placeholder="Enter website name"
             />
           </Form.Item>
-           
+
           <Form.Item label="Website Url" required>
             <Input
               value={url}
