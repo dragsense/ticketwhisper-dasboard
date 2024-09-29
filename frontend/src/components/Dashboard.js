@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Card, Button, Modal, Table, Spin, notification } from "antd"; // Ant Design components
-import { PlusOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+
 import {
   getUsersCount,
   getScrapeDataCount,

@@ -8,7 +8,7 @@ const websiteRoutes = require("./routes/websiteRoutes");
 const scrapeRoutes = require("./routes/scrapeRoutes");
 const userRoutes = require("./routes/userRoutes");
 const MongoStore = require("connect-mongo"); 
-
+const path = require("path");
 dotenv.config(); // Load .env variables
 connectDB();
 
@@ -90,6 +90,12 @@ app.post("/api/admin/logout", (req, res) => {
 app.use("/api/websites", authMiddleware, websiteRoutes);
 app.use("/api/urls", authMiddleware, scrapeRoutes);
 app.use("/api/users", authMiddleware, userRoutes);
+
+app.use(express.static(path.join(__dirname, '../frontend/build'))); 
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html')); 
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

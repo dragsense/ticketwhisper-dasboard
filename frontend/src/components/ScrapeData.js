@@ -10,11 +10,11 @@ import {
   Card,
   notification,
   Popconfirm,
-  Select,
   Row,
   Col,
   Pagination,
   Spin,
+  Checkbox,
 } from "antd";
 import {
   EditOutlined,
@@ -35,7 +35,6 @@ import {
 
 const ScrappData = () => {
   const { TabPane } = Tabs;
-  const { Option } = Select;
 
   // Websites and URLs state
   const [websites, setWebsites] = useState([]);
@@ -99,6 +98,7 @@ const ScrappData = () => {
   };
 
   useEffect(() => {
+    console.log(selectedWebsite);
     if (selectedWebsite?._id) {
       const dynamicColumns = selectedWebsite.scrapFields.map((field) => ({
         title: field.fieldTitle, // Column title
@@ -165,11 +165,9 @@ const ScrappData = () => {
     }
   };
 
-
   const fetchScrapedData = async (urlId, page, pageSize) => {
     setLoadingScrapedData(true);
 
-  
     try {
       const response = await getScrappedData(urlId, page, pageSize);
       const { data, total } = response;
@@ -218,7 +216,14 @@ const ScrappData = () => {
 
   const openEditModal = (url) => {
     setNewUrl(url);
-    form.setFieldsValue({ name: url.name, url: url.url, pageLimit: url.pageLimit, nextPageSelector: url.nextPageSelector }); // Set form values
+    form.setFieldsValue({
+      name: url.name,
+      url: url.url,
+      pageLimit: url.pageLimit,
+      nextPageSelector: url.nextPageSelector,
+      popupCloseSelector: url.popupCloseSelector,
+      isOnScroll: url.isOnScroll,
+    }); // Set form values
     setIsModalVisible(true);
   };
 
@@ -245,6 +250,7 @@ const ScrappData = () => {
 
   const deleteUrlScrapeData = async (urlId) => {
     try {
+   
       await deleteScrapData(urlId);
       fetchScrapedData(
         urlId,
@@ -260,11 +266,13 @@ const ScrappData = () => {
         message: "Error deleting URL Data",
         description: error.response?.data?.error || error.message,
       });
+    } finally {
     }
   };
 
   const scrapUrlData = async (urlId) => {
     try {
+      setLoadingScrapedData(true);
       await scrapData(urlId);
       fetchScrapedData(
         urlId,
@@ -280,6 +288,8 @@ const ScrappData = () => {
         message: "Error Scraping URL Data",
         description: error.response?.data?.error || error.message,
       });
+    } finally {
+      setLoadingScrapedData(false);
     }
   };
 
@@ -338,22 +348,25 @@ const ScrappData = () => {
 
   return (
     <div className="container mx-auto min-h-[86vh] p-6">
-
-      <Tabs defaultActiveKey="0">
+      <Tabs
+        defaultActiveKey="0"
+        onChange={(key) => {
+          const index = Number(key); // Convert key to number
+          if (index >= 0 && index < websites.length) {
+            setSelectedWebsite(websites[index]);
+          }
+        }}
+      >
         {loadingWebsites ? (
           <Spin size="large" />
         ) : (
           websites.map((website, wIdx) => (
-            <TabPane
-              tab={website.name}
-              key={wIdx}
-              onClick={() => setSelectedWebsite(website)}
-            >
+            <TabPane tab={website.name} key={wIdx}>
               <Row gutter={16}>
                 {/* Left Column: URLs List */}
                 <Col span={8}>
                   <Card
-                  loading={loadingUrls}
+                    loading={loadingUrls}
                     title="URL List"
                     extra={
                       <Button
@@ -391,7 +404,6 @@ const ScrappData = () => {
                           />
                         </Form.Item>
                       </div>
-
                     </div>
 
                     {loadingUrls ? (
@@ -454,10 +466,9 @@ const ScrappData = () => {
                 {/* Right Column: Scraped Data */}
                 <Col span={16}>
                   <Card
-                
                     title={`Scraped Data ${
                       selectedUrl ? `: ${selectedUrl.name}` : ""
-                    }`} 
+                    }`}
                     extra={
                       selectedUrl && (
                         <>
@@ -490,23 +501,19 @@ const ScrappData = () => {
                       )
                     }
                   >
-                    
-                      <Spin spinning={loadingScrapedData}>
-                   
+                    <Spin spinning={loadingScrapedData}>
                       {selectedUrl && (
-                    
-                          <Table
-                            dataSource={transformedData}
-                            columns={columns}
-                            pagination={{
-                              pageSize: scrapedDataPagination.pageSize,
-                              current: scrapedDataPagination.current,
-                              total: scrapedDataPagination.total,
-                            }}
-                            onChange={handleScrapedDataTableChange}
-                            scroll={{ y: 500 }}
-                          />
-                       
+                        <Table
+                          dataSource={transformedData}
+                          columns={columns}
+                          pagination={{
+                            pageSize: scrapedDataPagination.pageSize,
+                            current: scrapedDataPagination.current,
+                            total: scrapedDataPagination.total,
+                          }}
+                          onChange={handleScrapedDataTableChange}
+                          scroll={{ y: 500 }}
+                        />
                       )}
                     </Spin>
                   </Card>
@@ -549,25 +556,41 @@ const ScrappData = () => {
               onChange={(e) => setNewUrl({ ...newUrl, url: e.target.value })}
             />
           </Form.Item>
-          <Form.Item
-            label="Page Limit"
-            name="pageLimit"
-            
-          >
+          <Form.Item label="Page Limit" name="pageLimit">
             <Input
-            type="number"
+              type="number"
               value={newUrl.pageLimit}
-              onChange={(e) => setNewUrl({ ...newUrl, pageLimit: e.target.value })}
+              onChange={(e) =>
+                setNewUrl({ ...newUrl, pageLimit: e.target.value })
+              }
             />
           </Form.Item>
-          <Form.Item
-            label="Next Page Selector"
-            name="nextPageSelector"
-          >
+          <Form.Item label="Next Page Selector" name="nextPageSelector">
             <Input
+              disabled={newUrl.isOnScroll}
               value={newUrl.nextPageSelector}
-              onChange={(e) => setNewUrl({ ...newUrl, nextPageSelector: e.target.value })}
+              onChange={(e) =>
+                setNewUrl({ ...newUrl, nextPageSelector: e.target.value })
+              }
             />
+          </Form.Item>
+          <Form.Item label="Popup Close Selector" name="popupCloseSelector">
+            <Input
+              value={newUrl.popupCloseSelector}
+              onChange={(e) =>
+                setNewUrl({ ...newUrl, popupCloseSelector: e.target.value })
+              }
+            />
+          </Form.Item>
+          <Form.Item>
+            <Checkbox
+              checked={newUrl.isOnScroll}
+              onChange={(e) =>
+                setNewUrl({ ...newUrl, isOnScroll: e.target.checked })
+              }
+            >
+              Enable Scroll
+            </Checkbox>
           </Form.Item>
         </Form>
       </Modal>

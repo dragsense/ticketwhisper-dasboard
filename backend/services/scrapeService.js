@@ -99,10 +99,6 @@ exports.scrapeData = async (urlId) => {
   
   await ScrapeData.deleteMany({ urlId });
 
-  const scrapedDataArray = await puppeteerScraper.scrape(url);
+  await puppeteerScraper.scrape(url);
 
-  for (const scrapedData of scrapedDataArray) {
-    const newScrapeData = new ScrapeData({ urlId: url._id, data: scrapedData });
-    await newScrapeData.save();
-  }
 };

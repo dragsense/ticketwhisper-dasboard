@@ -8,7 +8,6 @@ import {
   notification,
   Spin,
   Button,
-  Skeleton,
 } from "antd";
 import {
   getNotificationsSetting,
