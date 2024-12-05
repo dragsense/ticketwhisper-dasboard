@@ -13,7 +13,7 @@ dotenv.config(); // Load .env variables
 connectDB();
 
 const app = express();
-app.use(cors({ origin: "http://localhost:3000", credentials: true })); // Adjust the origin for your frontend
+app.use(cors({ origin: "http://localhost:5000", credentials: true })); // Adjust the origin for your frontend
 app.use(express.json());
 app.use(cookieParser());
 
